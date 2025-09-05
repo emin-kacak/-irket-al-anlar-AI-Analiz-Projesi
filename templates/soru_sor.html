@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <title>Soru Sor</title>
+</head>
+<body>
+    <h1>Yapay Zeka'ya Soru Sor</h1>
+    <form method="post" action="/soru-sor">
+        <input type="text" name="soru" placeholder="Sorunuzu yazın" required>
+        <button type="submit">Gönder</button>
+    </form>
+    {% if cevap %}
+        <h2>Cevap:</h2>
+        <p>{{ cevap }}</p>
+    {% elif hata %}
+        <h2>Hata:</h2>
+        <p>{{ hata }}</p>
+    {% endif %}
+</body>
+</html>

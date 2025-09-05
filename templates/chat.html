@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <title>Akıllı Chat Asistanı</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='chat.css') }}">
+</head>
+<body>
+  <div id="chat-container">
+    <h2>Chat Asistanı</h2>
+    <button onclick="startNewSession()">🆕 Yeni Sohbet Başlat</button>
+    <div id="sessionInfo" style="margin-top:10px; font-weight:bold;"></div>
+    <div id="messages"></div>
+    <div id="input-area">
+      <input type="text" id="userInput" placeholder="Mesaj yaz..." />
+      <button onclick="sendMessage()">Gönder</button>
+    </div>
+  </div>
+
+  <script>
+    let sessionId = null;
+
+    async function startNewSession() {
+      const res = await fetch("/new_session");
+      const data = await res.json();
+      sessionId = data.session_id;
+      document.getElementById("sessionInfo").innerText = "Oturum ID: " + sessionId;
+      document.getElementById("messages").innerHTML = "";
+    }
+
+    async function sendMessage() {
+      const input = document.getElementById("userInput").value;
+      if (!input.trim()) return;
+
+      const res = await fetch("/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ session_id: sessionId, message: input })
+      });
+
+      const data = await res.json();
+      const chatBox = document.getElementById("messages");
+      chatBox.innerHTML += `<div class="message user">🧑 ${input}</div>`;
+      chatBox.innerHTML += `<div class="message bot">🤖 ${data.response}</div>`;
+      document.getElementById("userInput").value = "";
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    async function loadHistory() {
+      if (!sessionId) return;
+      const res = await fetch(`/history/${sessionId}`);
+      const data = await res.json();
+      const chatBox = document.getElementById("messages");
+      chatBox.innerHTML = "";
+      data.forEach(msg => {
+        const cls = msg.sender === "user" ? "user" : "bot";
+        const icon = msg.sender === "user" ? "🧑" : "🤖";
+        chatBox.innerHTML += `<div class="message ${cls}">${icon} ${msg.message}</div>`;
+      });
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    window.onload = async () => {
+      await startNewSession();
+      await loadHistory();
+    };
+  </script>
+</body>
+</html>
