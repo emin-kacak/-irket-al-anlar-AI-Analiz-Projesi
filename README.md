@@ -1,0 +1,1 @@
+# -irket-al-anlar-AI-Analiz-Projesi
